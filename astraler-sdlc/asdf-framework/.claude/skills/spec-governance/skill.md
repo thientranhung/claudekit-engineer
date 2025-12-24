@@ -1,105 +1,220 @@
 ---
 name: spec-governance
-description: Enforce spec-driven development standards, validate specifications, and ensure documentation quality.
+description: Validate specs, enforce standards, provide templates for ASDF specifications.
 ---
 
-# Spec Governance Skill
+# Spec Governance
 
-Ensure all specifications meet ASDF quality standards and properly govern the development process.
+Ensure all specifications follow ASDF standards, include required diagrams, and are properly versioned.
 
 ## When to Use
 
-Activate this skill when:
-- Creating new feature specifications (`/asdf:spec`)
-- Validating existing specs before implementation
-- Reviewing spec completeness after updates
-- Checking spec-code alignment
+- Creating new feature specs (`/asdf:spec`)
+- Creating domain specs (`/asdf:init`)
+- Creating system-core docs (`/asdf:init`)
+- Validating existing specs
+- Reviewing spec quality
 
-## Core Responsibilities
+## Templates
 
-### 1. Spec Validation
+### Feature Spec Template
+Load: `references/feature-template.md`
 
-Verify every spec contains required sections:
-- [ ] Overview with business context
-- [ ] Requirements (functional/non-functional)
-- [ ] Technical design
-- [ ] Acceptance criteria
-- [ ] Status tracking
+### Domain Spec Template
+Load: `references/domain-template.md`
 
-### 2. Quality Enforcement
+### System-Core Templates
+Load: `references/system-core-templates/README.md`
 
-Check specifications for:
-- **Completeness**: All required sections present
-- **Clarity**: Unambiguous requirements
-- **Testability**: Acceptance criteria are verifiable
-- **Consistency**: Aligned with `system-core/` rules
+Individual templates:
+- `references/system-core-templates/master-map-template.md`
+- `references/system-core-templates/data-architecture-template.md`
+- `references/system-core-templates/infrastructure-template.md`
 
-### 3. Hierarchy Compliance
+## Validation Rules
+Load: `references/validation-rules.md`
 
-Ensure proper tier relationships:
-```
-system-core/ → Cannot be modified without architect approval
-domains/     → Changes require impact assessment
-features/    → Can be updated via reverse sync
-operations/  → Freely updatable by AI
-```
+---
 
-### 4. Change Tracking
+## Mandatory Requirements
 
-All spec modifications must:
-- Include `[YYMMDD]` timestamp
-- Reference reason for change
-- Update relevant changelogs
+### 1. Version Header (ALL specs)
 
-## Validation Checklist
-
+Every spec file MUST start with:
 ```markdown
-## Spec Validation: [Feature Name]
-
-### Structure
-- [ ] Title and overview present
-- [ ] Requirements section complete
-- [ ] Technical design documented
-- [ ] UI/UX defined (if applicable)
-- [ ] Acceptance criteria listed
-- [ ] Status section present
-
-### Quality
-- [ ] No ambiguous requirements
-- [ ] Dependencies documented
-- [ ] Constraints identified
-- [ ] Edge cases considered
-
-### Compliance
-- [ ] Follows `system-core/` guidelines
-- [ ] Aligned with `domains/` logic
-- [ ] No conflicts with other features
-- [ ] Changelog updated
-
-### Result
-[PASS/FAIL] - [Notes]
+> **Version:** 1.0.0
+> **Status:** Draft | Review | Approved
+> **Last Updated:** YYMMDD
 ```
 
-## Integration Points
+### 2. Mermaid Diagrams (REQUIRED)
 
-Load reference files:
-- `references/validation-rules.md` - Detailed validation criteria
-- `references/template-spec.md` - Standard spec template
+| Document Type | Required Diagram | Mermaid Type |
+|---------------|------------------|--------------|
+| master-map.md | System architecture | flowchart |
+| data-architecture.md | ERD | erDiagram |
+| infrastructure.md | Deployment topology | flowchart |
+| Domain specs | Entity relationships | erDiagram |
+| Feature specs | User flow | flowchart |
 
-## Output
+**Never create these documents without their required diagrams.**
 
-After validation, report:
+### 3. Open Questions Section
+
+All specs MUST include:
+```markdown
+## Open Questions
+
+| # | Question | Impact | Status |
+|---|----------|--------|--------|
+| 1 | [Unresolved item] | [How it affects work] | Open |
 ```
-Spec Governance Check: [Feature Name]
 
-Status: [PASS/FAIL/NEEDS REVIEW]
+### 4. Changelog Section
 
-Issues Found: [N]
-- [Issue 1]
-- [Issue 2]
+All specs MUST include:
+```markdown
+## Changelog
 
-Recommendations:
-- [Action items]
+### YYMMDD - v1.0.0 - Initial Draft
+- Created spec
+- [What was defined]
+```
 
-Changelog updated: [Yes/No]
+---
+
+## Quick Reference
+
+### Feature Spec Required Sections
+1. Overview + Business Value
+2. **User Flow Diagram (mermaid)** ← REQUIRED
+3. Requirements (FR/NFR/Out of Scope)
+4. Technical Design + Data Flow Diagram
+5. UI/UX (wireframes)
+6. API Contract
+7. Acceptance Criteria
+8. Testing
+9. **Open Questions** ← REQUIRED
+10. Implementation Progress
+11. **Changelog** ← REQUIRED
+
+### Domain Spec Required Sections
+1. Overview + Responsibilities
+2. **ERD Diagram (mermaid)** ← REQUIRED
+3. Entities (with field types)
+4. State Machines (if applicable)
+5. Domain Events
+6. API Contracts
+7. Business Rules
+8. Error Codes
+9. Dependencies
+10. **Open Questions** ← REQUIRED
+11. **Changelog** ← REQUIRED
+
+### System-Core Required Diagrams
+| File | Diagram |
+|------|---------|
+| master-map.md | System architecture flowchart |
+| data-architecture.md | Full ERD |
+| infrastructure.md | Deployment topology |
+
+---
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Feature folders | YYMMDD-feature-name | 251224-user-auth |
+| Domain folders | domain-name | auth, payments |
+| Requirement IDs | FR-001, NFR-001 | FR-001 |
+| Acceptance Criteria | AC-001 | AC-001 |
+| Business Rule IDs | [DOMAIN]-001 | AUTH-001 |
+| Version | Semantic | 1.0.0, 1.1.0, 2.0.0 |
+
+---
+
+## Quality Checklist
+
+Before finalizing any spec:
+
+### Universal (All Specs)
+- [ ] Version header present (v1.0.0 format)
+- [ ] Status field present (Draft/Review/Approved)
+- [ ] Last Updated date set
+- [ ] Open Questions section present
+- [ ] Changelog section present
+
+### Feature Specs
+- [ ] User flow mermaid diagram included
+- [ ] All FRs have priority
+- [ ] All NFRs have measurable targets
+- [ ] API contracts have request/response examples
+- [ ] Acceptance criteria are testable (Given/When/Then)
+
+### Domain Specs
+- [ ] ERD mermaid diagram included
+- [ ] All entities documented with field types
+- [ ] Business rules have unique IDs
+- [ ] Dependencies mapped (incoming and outgoing)
+
+### System-Core Docs
+- [ ] Required diagram included (master-map, data-architecture, infrastructure)
+- [ ] Deep technical content (not placeholders)
+- [ ] Rules & constraints documented
+
+---
+
+## Diagram Examples
+
+### User Flow (Feature Specs)
+```mermaid
+flowchart TD
+    A[User Action] --> B{Decision}
+    B -->|Yes| C[Process]
+    B -->|No| D[Alternative]
+    C --> E[Result]
+    D --> E
+```
+
+### ERD (Domain Specs)
+```mermaid
+erDiagram
+    USER ||--o{ ORDER : places
+    USER {
+        uuid id PK
+        string email UK
+    }
+    ORDER {
+        uuid id PK
+        uuid user_id FK
+    }
+```
+
+### System Architecture (master-map.md)
+```mermaid
+flowchart TB
+    subgraph Client
+        Web[Web App]
+    end
+    subgraph API
+        Gateway[API Gateway]
+    end
+    subgraph Services
+        Auth[Auth Service]
+    end
+    Web --> Gateway
+    Gateway --> Auth
+```
+
+### Deployment Topology (infrastructure.md)
+```mermaid
+flowchart TB
+    subgraph Cloud
+        LB[Load Balancer]
+        App[App Servers]
+        DB[(Database)]
+    end
+    Users --> LB
+    LB --> App
+    App --> DB
 ```

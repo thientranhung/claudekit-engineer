@@ -1,164 +1,152 @@
 ---
-description: Trigger Reverse Sync - update specs from code
-argument-hint: [scope: all|feature-path]
+description: SYNC MODE - Reverse sync code changes back to specs with confirmation
+argument-hint: [feature-path] (optional)
 ---
 
-## Mission
+# SYNC MODE: Reverse Sync
 
-Scan codebase, detect spec-code divergences, and update specifications to reflect actual implementation.
+**Target:** $ARGUMENTS (or scan all active features if blank)
 
-<scope>
-$ARGUMENTS
-</scope>
+---
 
-## Pre-Execution
+## Skills Required
 
-1. Activate `reverse-sync` skill
-2. Determine scope:
-   - If `all` or empty → Full project sync
-   - If path provided → Sync specific feature only
+- **Activate:** `reverse-sync` (for sync protocol)
+- **Activate:** `refinement-loop` (for confirmation)
 
-## Execution Steps
+---
 
-### Step 1: Gather Current State
+## Workflow
 
-**For full sync:**
-- List all features in `asdf-docs/03-features/`
-- Identify corresponding code locations
-- Note last sync dates from spec annotations
+### Step 1: Identify Scope
 
-**For targeted sync:**
-- Load specified feature spec
-- Identify related code files
-- Check existing sync annotations
+1. If path provided: sync that specific feature
+2. If blank: check `astraler-docs/04-operations/implementation-active.md` for active work
+3. List features to sync
 
-### Step 2: Analyze Divergences
+---
 
-For each feature:
+### Step 2: Compare Code vs Spec
 
-1. **Read spec** requirements and technical design
-2. **Scan code** for implementation
-3. **Compare** spec vs code:
-   - Missing implementations (spec has, code doesn't)
-   - Extra implementations (code has, spec doesn't)
-   - Different implementations (both have, but differ)
+For each feature in scope:
 
-### Step 3: Generate Diff Report
+1. Read current spec from `astraler-docs/03-features/[feature]/spec.md`
+2. Note spec version (e.g., v1.2.0)
+3. Analyze actual implementation in codebase
+4. Identify deviations:
+   - **Additions** — Code has features not in spec
+   - **Changes** — Implementation differs from spec
+   - **Removals** — Spec features not implemented
+
+---
+
+### Step 3: Present Sync Preview
 
 ```markdown
-# Reverse Sync Report - [YYMMDD]
+**Sync Preview for [Feature Name]**
 
-## Summary
-- Features analyzed: [N]
-- Divergences found: [N]
-- Specs requiring update: [N]
+Current spec version: v[X.Y.Z]
 
-## Divergence Details
+**Deviations Found:**
 
-### Feature: [feature-name]
-**Status**: Needs sync / Up to date
+| # | Type | Section | Spec Says | Code Does | Reason |
+|---|------|---------|-----------|-----------|--------|
+| 1 | Change | API | POST /users | POST /api/v1/users | Added versioning |
+| 2 | Addition | - | Not specified | Rate limiting | Security |
+| 3 | Removal | UI | Wizard flow | Single form | Simplified UX |
 
-| Spec Says | Code Does | Action |
-|-----------|-----------|--------|
-| [requirement] | [implementation] | Update spec |
+**Proposed spec update:** v[X.Y.+1]
 
-### Feature: [feature-name-2]
-...
+Please choose:
+- **Feedback** — Type your changes to the sync
+- **Confirm** — Type `confirm` to apply sync
+- **Cancel** — Type `cancel` to abort
 ```
 
-### Step 4: Update Specifications
+---
 
-For each divergence:
+### Step 4: On Confirm — Apply Sync
 
-1. **Open** the spec file
-2. **Update** relevant sections
-3. **Annotate** with sync marker:
+For each deviation:
+
+1. **Update spec section:**
    ```markdown
+   ### [Section Name]
+
+   <!-- Original (v1.2.0): [what spec said] -->
+   [What was actually implemented]
+
+   **Reason:** [Why the change was necessary]
    [Reverse Synced: YYMMDD]
    ```
-4. **Preserve** original intent in comments if significant change
 
-Example update:
-```markdown
-## Technical Design
+2. **Increment spec version** (minor bump: X.Y.+1)
 
-### Data Storage
-<!-- Original: Planned to use localStorage -->
-Uses IndexedDB for offline data persistence, providing better
-performance for large datasets. [Reverse Synced: 231215]
-```
+3. **Update changelog:**
+   ```markdown
+   ### YYMMDD - Reverse Sync (v[X.Y.Z])
 
-### Step 5: Update Changelogs
+   - [Section]: [Change description]
+   - [Section]: [Change description]
+   - Reason: [Brief explanation]
+   ```
 
-For each updated spec, append to its changelog:
-```markdown
-## [YYMMDD] - Reverse Sync
-- Updated [section] to reflect implementation
-- Reason: [Code improvement/Constraint/Bug fix]
-- Changed by: Coder AI (automated sync)
-```
+---
 
-Create/update global changelog:
-`asdf-docs/04-operations/changelog/YYMMDD-reverse-sync.md`
+### Step 5: Verify & Report
+
+After applying sync:
 
 ```markdown
-# Reverse Sync Log - [YYMMDD]
+**Sync Complete**
 
-## Scope
-[All features / Specific feature]
+- **Feature:** [feature-name]
+- **Previous Version:** v[X.Y.Z]
+- **New Version:** v[X.Y.Z+1]
+- **Sections Updated:** [N]
 
-## Updated Specs
-1. `features/YYMMDD-feature-1/spec.md`
-   - [List of changes]
-2. `features/YYMMDD-feature-2/spec.md`
-   - [List of changes]
+**Changes Applied:**
+- [Section]: [What changed]
+- [Section]: [What changed]
 
-## Unchanged (Already in sync)
-- `features/YYMMDD-feature-3/spec.md`
-
-## Warnings
-[Any concerning divergences requiring architect review]
+Spec now accurately reflects implementation.
 ```
 
-### Step 6: Update Project Status
+---
 
-Update `asdf-docs/01-system-core/project-status.md`:
+## Audit Trail Format
+
+Preserve original text in HTML comments:
+
 ```markdown
-## Recent Activity
-- [YYMMDD] Reverse sync completed ([N] specs updated)
+## 3. Technical Design
+
+### API Endpoint
+
+<!-- Original (v1.0.0): POST /users with email, password -->
+POST /api/v1/users with email, password, and optional phone
+
+**Reason:** Added API versioning and optional phone field for 2FA
+[Reverse Synced: 251224]
 ```
 
-### Step 7: Report Results
+---
 
-```
-Reverse Sync Complete
+## When to Trigger
 
-Scope: [All / Specific path]
-Features Analyzed: [N]
-Specs Updated: [N]
-Specs Unchanged: [N]
+- After implementation deviates from spec (called from `/asdf:code`)
+- When discovering code-spec drift during review
+- Before session handoff to ensure docs are current
+- After bug fixes that reveal spec inaccuracies
 
-Updated Files:
-- asdf-docs/03-features/[path]/spec.md
-- [additional files]
+---
 
-Changelog: asdf-docs/04-operations/changelog/YYMMDD-reverse-sync.md
+## Rules
 
-Warnings:
-- [Any items needing architect attention]
-
-Recommendation:
-- [Next steps, if any]
-```
-
-## Escalation Triggers
-
-**STOP and alert Product Architect if:**
-- Divergence affects `system-core/` documents
-- Breaking changes detected
-- Security-related changes found
-- Cross-domain dependencies affected
-
-## Post-Execution
-
-Activate `spec-governance` skill to validate updated specs.
+- **Always preview first** — Show what will change before applying
+- **Always confirm** — Never apply sync without explicit confirm
+- **Truth over convenience** — Document what IS, not what should be
+- **Preserve history** — Use HTML comments for original text
+- **Explain why** — Every change needs a reason
+- **Version track** — Increment spec version on sync
+- **Atomic updates** — Sync one feature at a time for clarity

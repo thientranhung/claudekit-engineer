@@ -1,27 +1,3 @@
 {
-  "includeCoAuthoredBy": false,
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/spec-validation-hook.js"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/deviation-tracker-hook.js"
-          }
-        ]
-      }
-    ]
-  }
+  "includeCoAuthoredBy": false
 }

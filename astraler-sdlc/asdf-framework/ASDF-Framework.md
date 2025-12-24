@@ -1,8 +1,16 @@
 # ASDF (Astraler Spec-Driven Framework)
 
-> **Version**: 2.0.0
-> **Last Updated**: 241223
+> **Version**: 2.1.0
+> **Last Updated**: 251224
 > **Status**: Production Ready
+
+### v2.1 Features
+- **Iterative Refinement Loop** — Feedback → Reference → Confirm cycle
+- **Duplicate Detection** — Checks existing specs before creation
+- **Reference Collection** — Progressive document gathering
+- **Mermaid Diagrams** — Required for all architecture/domain/feature specs
+- **13 System-Core Templates** — Complete template library
+- **Version Management** — Semantic versioning (X.Y.Z) in all specs
 
 ---
 
@@ -105,28 +113,33 @@ When starting any task, AI loads context in this sequence:
 
 ```
 .claude/
-├── workflows/
-│   ├── primary-workflow.md
-│   ├── development-rules.md
-│   ├── spec-governance.md
-│   └── reverse-sync-protocol.md
+├── settings.json
 ├── commands/asdf/
-│   ├── init.md
-│   ├── spec.md
-│   ├── implement.md
-│   ├── sync.md
-│   ├── status.md
-│   └── handoff.md
+│   ├── init.md              # Initialize ASDF structure
+│   ├── spec.md              # Create feature specifications
+│   ├── code.md              # Execute implementation from spec
+│   ├── sync.md              # Trigger Reverse Sync
+│   ├── status.md            # Update project status
+│   └── handoff.md           # Create session handoff notes
 ├── skills/
 │   ├── spec-governance/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── validation-rules.md
+│   │       ├── feature-template.md
+│   │       ├── domain-template.md
+│   │       └── system-core-templates/
 │   ├── reverse-sync/
-│   └── context-loading/
-├── agents/
-│   ├── spec-architect.md
-│   └── implementer.md
-└── hooks/
-    ├── spec-validation-hook.js
-    └── deviation-tracker-hook.js
+│   │   ├── SKILL.md
+│   │   └── references/sync-protocol.md
+│   ├── context-loading/
+│   │   ├── SKILL.md
+│   │   └── references/loading-order.md
+│   └── refinement-loop/
+│       ├── SKILL.md
+│       └── references/reference-collection.md
+└── agents/
+    └── asdf-coder.md        # Single agent with 3 modes
 ```
 
 ### 4.2 Slash Commands
@@ -135,7 +148,7 @@ When starting any task, AI loads context in this sequence:
 |---------|---------|
 | `/asdf:init` | Initialize ASDF structure for new project |
 | `/asdf:spec [feature]` | Brainstorm and create feature specification |
-| `/asdf:implement [path]` | Execute implementation from specification |
+| `/asdf:code [path]` | Execute implementation from specification |
 | `/asdf:sync` | Trigger Reverse Sync (Code → Docs) |
 | `/asdf:status` | Update project-level status heartbeat |
 | `/asdf:handoff` | Create session handoff notes |
@@ -144,16 +157,18 @@ When starting any task, AI loads context in this sequence:
 
 | Skill | Purpose |
 |-------|---------|
-| `spec-governance` | Validate specs, enforce standards |
+| `spec-governance` | Validate specs, enforce standards, templates |
 | `reverse-sync` | Detect deviations, update specs |
 | `context-loading` | Load hierarchical context properly |
+| `refinement-loop` | Collect references, iterate feedback/refine/confirm |
 
-### 4.4 Agents
+### 4.4 Agent
 
-| Agent | Purpose |
-|-------|---------|
-| `spec-architect` | Design mode - create/refine specs |
-| `implementer` | Execute mode - code from specs |
+| Agent | Mode | Purpose |
+|-------|------|---------|
+| `asdf-coder` | DESIGN | Create/refine specs (brainstorm, structure) |
+| `asdf-coder` | EXECUTE | Implement code from specs |
+| `asdf-coder` | SYNC | Validate code-spec alignment, reverse sync |
 
 ---
 
@@ -294,7 +309,7 @@ When starting any task, AI loads context in this sequence:
 │       ↓           Uses spec-governance skill                │
 │                                                             │
 │  4. EXECUTE       AI implements from spec                   │
-│       ↓           Uses implementer agent                    │
+│       ↓           Uses asdf-coder (EXECUTE mode)            │
 │                                                             │
 │  5. REVERSE SYNC  AI updates Docs if code deviates          │
 │       ↓           Uses reverse-sync skill                   │
@@ -307,7 +322,202 @@ When starting any task, AI loads context in this sequence:
 
 ---
 
-## 10. Quick Start
+## 10. Case Studies
+
+### Case Study 1: New Project Initialization
+
+**Scenario:** Starting a new e-commerce project called "ShopFlow"
+
+```
+Architect: /asdf:init
+
+AI: I'll initialize ASDF structure for your project.
+    What reference documents do you have?
+
+    A) Existing codebase to analyze
+    B) Design documents (Figma, PRD, etc.)
+    C) Requirements documents (BRD, SAD, TDD)
+    D) Start from scratch
+
+Architect: C - I have BRD and database schema docs
+
+AI: [Collects references from provided documents]
+    [Creates astraler-docs/ structure]
+
+    Generated:
+    ├── 01-system-core/
+    │   ├── 01-architecture/master-map.md      ← From BRD
+    │   ├── 01-architecture/data-architecture.md ← From DB schema
+    │   └── 02-standards/code-standards.md
+    ├── 02-domains/
+    │   ├── auth/domain.md
+    │   ├── products/domain.md
+    │   ├── cart/domain.md
+    │   └── orders/domain.md
+    └── 04-operations/
+        └── session-handoff.md
+
+    Ready for refinement. Any feedback?
+
+Architect: Add payment domain, we're using Stripe
+
+AI: [Updates structure, adds payments/domain.md with Stripe integration]
+    Confirmed. 19 files created.
+```
+
+---
+
+### Case Study 2: Feature Development Lifecycle
+
+**Scenario:** Adding "Guest Checkout" feature to ShopFlow
+
+```
+Architect: /asdf:spec guest-checkout
+
+AI: [Loads context: system-core → cart domain → orders domain]
+
+    Brainstorming guest-checkout feature...
+
+    Questions:
+    1. Should guests convert to registered users post-purchase?
+    2. Email required for order confirmation?
+    3. Save address for future use (with consent)?
+
+Architect: Yes to all three
+
+AI: [Creates 03-features/251224-guest-checkout.md]
+
+    Feature Spec Draft:
+    - FR-001: Allow checkout without account
+    - FR-002: Collect email for confirmation
+    - FR-003: Optional account creation post-purchase
+    - FR-004: Address save with GDPR consent
+
+    Acceptance Criteria:
+    - AC-001: Guest can complete purchase in <3 clicks
+    - AC-002: Order confirmation sent within 30s
+
+    Ready for refinement?
+
+Architect: confirm
+
+AI: Spec finalized. Ready to implement with /asdf:code
+```
+
+```
+Architect: /asdf:code 03-features/251224-guest-checkout
+
+AI: [Reads spec, loads domain context]
+
+    Implementation Plan:
+    1. Backend: GuestCheckoutService, OrderController updates
+    2. Frontend: GuestCheckoutForm component
+    3. Database: guest_orders table migration
+
+    Proceeding...
+
+    [Creates files, implements feature]
+
+    Implementation complete. Tests passing.
+    Updated implementation-active.md
+```
+
+---
+
+### Case Study 3: Reverse Sync (Code Deviation)
+
+**Scenario:** During implementation, discovered spec needs correction
+
+```
+Architect: /asdf:code 03-features/251224-guest-checkout
+
+AI: [Implementing FR-003: Post-purchase account creation]
+
+    ⚠️ DEVIATION DETECTED
+
+    Spec says: "Create account automatically after purchase"
+    Reality: GDPR requires explicit opt-in, cannot auto-create
+
+    Triggering Reverse Sync...
+
+    Updated spec (251224-guest-checkout.md):
+
+    - FR-003: ~~Auto-create account post-purchase~~
+    + FR-003: Show account creation prompt post-purchase
+            User must explicitly opt-in (GDPR compliance)
+    [Reverse Synced: 251224]
+
+    Changelog updated:
+    - 251224: FR-003 modified for GDPR compliance
+
+    Continue implementation with corrected approach?
+
+Architect: yes
+
+AI: [Implements opt-in flow instead of auto-creation]
+    Done. Spec and code now aligned.
+```
+
+---
+
+### Case Study 4: Session Continuity (Handoff)
+
+**Scenario:** Ending work session, another AI will continue tomorrow
+
+```
+Architect: /asdf:handoff
+
+AI: Creating session handoff notes...
+
+    SESSION HANDOFF - 251224
+    ─────────────────────────
+
+    ✅ COMPLETED:
+    - Guest checkout backend (100%)
+    - Database migrations applied
+    - Unit tests passing (12/12)
+
+    🔄 IN PROGRESS:
+    - Frontend GuestCheckoutForm (60%)
+    - Pending: validation, error states
+
+    ❌ BLOCKED:
+    - Email service config missing (needs SMTP credentials)
+
+    📋 NEXT SESSION:
+    1. Get SMTP credentials from DevOps
+    2. Complete GuestCheckoutForm
+    3. Integration tests
+    4. /asdf:sync to verify alignment
+
+    Quick Resume:
+    cat astraler-docs/04-operations/session-handoff.md
+    /asdf:code 03-features/251224-guest-checkout
+
+    Saved to session-handoff.md
+```
+
+**Next day, new session:**
+
+```
+Architect: Continue where we left off
+
+AI: [Reads session-handoff.md]
+
+    Resuming from 251224 session:
+    - Guest checkout frontend at 60%
+    - Blocker: SMTP credentials
+
+    Do you have the SMTP credentials now?
+
+Architect: Yes, here they are...
+
+AI: [Continues implementation seamlessly]
+```
+
+---
+
+## 11. Quick Start
 
 ### For New Projects
 
@@ -324,7 +534,7 @@ cp asdf-framework/CLAUDE.md your-project/
 /asdf:spec user-authentication
 
 # 4. Implement from spec
-/asdf:implement astraler-docs/03-features/YYMMDD-user-authentication/
+/asdf:code astraler-docs/03-features/YYMMDD-user-authentication/
 ```
 
 ### For Existing Sessions
@@ -337,7 +547,7 @@ cat astraler-docs/04-operations/session-handoff.md
 cat astraler-docs/04-operations/implementation-active.md
 
 # 3. Continue implementation
-/asdf:implement [spec-path]
+/asdf:code [spec-path]
 
 # 4. End session properly
 /asdf:handoff
@@ -345,7 +555,7 @@ cat astraler-docs/04-operations/implementation-active.md
 
 ---
 
-## 11. Reference Implementation
+## 12. Reference Implementation
 
 A complete sample project demonstrating ASDF patterns is available at:
 
