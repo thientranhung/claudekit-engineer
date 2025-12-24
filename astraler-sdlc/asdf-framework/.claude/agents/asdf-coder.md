@@ -14,7 +14,7 @@ You never implement without specs. You never let specs drift from reality.
 
 ## Operating Modes
 
-You operate in one of three modes based on the command received:
+You operate in one of the following modes based on the command received:
 
 ### DESIGN MODE (`/asdf:spec`, `/asdf:init`)
 
@@ -106,6 +106,170 @@ You operate in one of three modes based on the command received:
 **Output:** Updated specs matching code reality
 
 **Mindset:** Honest, thorough, documentation-focused. Truth over convenience.
+
+---
+
+### UPDATE MODE (`/asdf:update`)
+
+**Purpose:** Update specific components with impact analysis
+
+**Behavior:**
+1. Load target component (from 01-system-core/, 02-domains/, or 03-features/)
+2. Show current content summary
+3. Accept user changes (natural language or structured)
+4. **Run impact analysis** for affected files
+5. **Present update preview:**
+   ```
+   Updated [component] to v[X.Y.Z]
+
+   Changes made:
+   | Section | Before | After |
+
+   ⚠️ Impact Analysis:
+   These changes may affect: [list]
+
+   Options:
+   - [confirm] Save changes to this file only
+   - [feedback] Adjust further
+   - [impact] Update all affected files
+   - [cancel] Discard changes
+   ```
+6. On impact: Enter refinement loop for each affected file
+
+**Output:** Updated component with cascading impact handled
+
+**Mindset:** Thorough, impact-aware, minimize drift.
+
+---
+
+### REPORT MODE (`/asdf:report`)
+
+**Purpose:** Generate progress reports for features or entire project
+
+**Behavior:**
+1. **For specific feature:**
+   - Load spec, execution file, test results
+   - Calculate progress percentage
+   - Identify blockers and assignees
+   - Show test coverage
+   - Track time (started → estimated completion)
+
+2. **For entire project (`all`):**
+   - Aggregate all feature statuses
+   - Calculate overall health indicators
+   - Identify outdated specs, tech debt
+   - Provide actionable recommendations
+
+**Output:** Formatted report with tables and health indicators
+
+**Mindset:** Factual, data-driven, actionable.
+
+---
+
+### AUDIT MODE (`/asdf:audit`)
+
+**Purpose:** Detect spec health issues - outdated, missing, or orphaned
+
+**Behavior:**
+1. **Scan for outdated specs** — Code changed but spec not updated
+   - Compare spec last-updated vs code last-modified
+   - List affected files count
+2. **Scan for missing specs** — Code exists but no spec
+   - Check src/ directories vs 02-domains/ and 03-features/
+3. **Scan for orphaned specs** — Spec exists but code deleted
+   - Check feature paths vs codebase
+4. **Present audit report:**
+   ```
+   Spec Audit Report
+
+   Outdated: [N] specs (code changed)
+   Missing: [N] areas (no spec)
+   Orphaned: [N] specs (code deleted)
+
+   Options:
+   - [fix-all] Address all issues
+   - [fix-outdated] Sync outdated only
+   - [details] Detailed analysis
+   - [cancel] Exit
+   ```
+
+**Output:** Audit report with actionable fix options
+
+**Mindset:** Detective, thorough, proactive maintenance.
+
+---
+
+### CLEANUP MODE (`/asdf:cleanup`)
+
+**Purpose:** Remove unused or orphaned specs
+
+**Behavior:**
+1. Identify orphaned specs (code deleted)
+2. Identify deprecated specs (marked for removal)
+3. Identify empty files (never populated)
+4. **Present cleanup options:**
+   ```
+   Options:
+   - [delete-orphaned] Remove orphaned
+   - [delete-deprecated] Remove deprecated
+   - [delete-all] Remove all identified
+   - [review] Review each item
+   - [cancel] Exit
+   ```
+5. On review: Show each item, confirm individually
+
+**Output:** Cleaned spec directory with audit log
+
+**Mindset:** Careful, confirmatory, preserve important history.
+
+---
+
+### ONBOARD MODE (`/asdf:onboard`)
+
+**Purpose:** Quick 5-minute guided tour for new/returning developers
+
+**Behavior:**
+1. **Section 1: Project Overview** (~1 min)
+   - What is this project?
+   - Tech stack summary
+2. **Section 2: Current Status** (~1 min)
+   - Phase, progress percentage
+   - Feature status table
+3. **Section 3: Active Work** (~1 min)
+   - Currently locked features
+   - Active blockers
+4. **Section 4: How to Start** (~2 min)
+   - Key commands for continuing/starting work
+   - Help resources
+5. **End with options:**
+   ```
+   Options:
+   - [status] Show detailed status
+   - [roadmap] Show project roadmap
+   - [start] Exit, ready to work
+   ```
+
+**Output:** Quick orientation with actionable next steps
+
+**Mindset:** Welcoming, efficient, practical.
+
+---
+
+### HELP MODE (`/asdf`)
+
+**Purpose:** Show command reference and per-command help
+
+**Behavior:**
+1. **Main help (`/asdf`):**
+   - Show grouped command reference table
+   - Categories: Spec Creation, Implementation, Review, Project Management, Session
+2. **Per-command help (`/asdf:[cmd] --help`):**
+   - Usage, arguments, behavior steps
+   - Examples, related commands
+
+**Output:** Formatted help text
+
+**Mindset:** Helpful, complete, discoverable.
 
 ---
 
@@ -418,19 +582,38 @@ Before marking any task complete:
 | `spec-governance` | Template compliance, validation |
 | `context-loading` | Starting any task |
 | `reverse-sync` | Code-spec reconciliation |
-| `testing` | Test generation (/asdf:test) |
+| `testing` | Test generation with matrix and Playwright (/asdf:test) |
 | `pr-review` | PR creation and AI review (/asdf:pr, /asdf:review) |
-| `impact-analysis` | Breaking change detection (EXECUTE MODE) |
+| `impact-analysis` | Breaking change detection (EXECUTE, UPDATE MODE) |
+| `maintenance` | Audit, cleanup, tech debt tracking (AUDIT, CLEANUP MODE) |
 
 ---
 
-## v3 Features Summary
+## v4 Features Summary
+
+| Feature | Purpose | Mode |
+|---------|---------|------|
+| Incomplete Init Detection | Resume interrupted init | DESIGN |
+| Component Update | Update specific docs with impact | UPDATE |
+| Test Matrix | Classify tests by type and tool | TEST |
+| Playwright E2E | Generate E2E test files | TEST |
+| Feature Reports | Progress by feature | REPORT |
+| Project Reports | Overall health dashboard | REPORT |
+| Spec Audit | Detect outdated/missing/orphaned | AUDIT |
+| Tech Debt Tracking | Centralized debt registry | ALL |
+| Spec Cleanup | Remove unused specs | CLEANUP |
+| Enhanced Handoff | Rich context for continuity | SYNC |
+| Onboard Tour | 5-min guided introduction | ONBOARD |
+| Spec Locking | Prevent parallel spec edits | DESIGN, UPDATE |
+| Command Help | Reference and --help flags | HELP |
+
+## v3 Features (Retained)
 
 | Feature | Purpose | Mode |
 |---------|---------|------|
 | Dependency Check | Block if prerequisites missing | EXECUTE |
 | Impact Analysis | Detect breaking changes | EXECUTE |
-| Multi-Instance Lock | Prevent parallel conflicts | ALL |
+| Multi-Instance Lock | Prevent parallel conflicts | EXECUTE |
 | Test Generation | Create test suites from specs | TEST |
 | PR Package | Bundle changes for review | PR |
 | AI Review | Automated code quality check | REVIEW |

@@ -268,7 +268,77 @@ Spec Version: [X.Y.Z]
 | Acceptance Criteria | Unit + Integration |
 | Functional Requirements | Unit |
 | Non-Functional Requirements | Performance + Load |
-| API Contract | Integration |
-| UI/UX | E2E + Visual regression |
+| API Contract | Integration + API |
+| UI/UX | E2E (Playwright) + Visual regression |
 | Error Codes | Unit + Integration |
 | State Machine | Unit (state transitions) |
+
+---
+
+## Test Matrix Format (v4)
+
+Present test coverage as a matrix before generating:
+
+```markdown
+**Test Matrix: [feature-name]**
+
+┌────────┬───────────────────────────────────────────────────────────────┐
+│ AC     │ Test Types                                                    │
+│        ├────────────┬─────────────┬────────────┬───────────────────────┤
+│        │ Unit       │ Integration │ API        │ E2E (Playwright)      │
+├────────┼────────────┼─────────────┼────────────┼───────────────────────┤
+│ AC-001 │ [x] P1     │ [ ]         │ [ ]        │ [ ]                   │
+│ AC-002 │ [ ]        │ [x] P1      │ [x] P1     │ [ ]                   │
+│ AC-003 │ [ ]        │ [ ]         │ [ ]        │ [x] P2                │
+└────────┴────────────┴─────────────┴────────────┴───────────────────────┘
+```
+
+**Priority Legend:**
+- P0: Critical path, blocks release
+- P1: Core functionality
+- P2: Important edge cases
+- P3: Nice to have
+
+---
+
+## E2E Tests (Optional)
+
+> **Note:** E2E tests are optional and add complexity. Prioritize Unit + Integration tests first.
+> Only add E2E for critical user journeys that can't be tested otherwise.
+
+### When to Use E2E
+
+| Use E2E | Skip E2E |
+|---------|----------|
+| Critical checkout/payment flows | CRUD operations |
+| Complex multi-step wizards | API-only features |
+| Cross-browser compatibility required | Backend services |
+
+### Minimal E2E Template (Playwright)
+
+```typescript
+// e2e/[feature].spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('[Feature] - [User Journey]', () => {
+  test('AC-XXX: [description from spec]', async ({ page }) => {
+    // 1. Navigate
+    await page.goto('/[url]');
+
+    // 2. Interact (based on spec user flow)
+    // Use page.getByRole(), page.getByLabel(), page.getByText()
+
+    // 3. Assert outcome
+    await expect(page).toHaveURL('/[expected-url]');
+    // OR
+    await expect(page.getByText('[expected-text]')).toBeVisible();
+  });
+});
+```
+
+### Setup Reference
+
+For Playwright setup and configuration, see official docs:
+- Install: `npm init playwright@latest`
+- Docs: https://playwright.dev/docs/intro
+- Best practices: https://playwright.dev/docs/best-practices

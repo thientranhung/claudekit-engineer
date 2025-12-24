@@ -17,7 +17,7 @@ Single entry point for all project starting scenarios with iterative refinement.
 
 ---
 
-## Step 0: Duplicate Detection (CRITICAL)
+## Step 0: Incomplete Detection Scan (CRITICAL)
 
 Before anything else, check if ASDF structure already exists:
 
@@ -26,32 +26,128 @@ Before anything else, check if ASDF structure already exists:
 ls astraler-docs/ 2>/dev/null
 ```
 
-**If exists, present:**
+**If not exists:** Proceed to Step 1.
+
+**If exists:** Run comprehensive scan:
+
+### Scan All Expected Components
 
 ```markdown
-**ASDF structure already exists.**
+**ASDF structure exists. Scanning completeness...**
 
-Current state:
+┌─────────────────────────────────────┬──────────┬─────────┐
+│ Component                           │ Status   │ % Done  │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 01-system-core/01-architecture/     │ [STATUS] │ [XX]%   │
+│   ├── master-map.md                 │ [STATUS] │         │
+│   ├── tech-stack.md                 │ [STATUS] │         │
+│   ├── data-architecture.md          │ [STATUS] │         │
+│   └── infrastructure.md             │ [STATUS] │         │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 01-system-core/02-standards/        │ [STATUS] │ [XX]%   │
+│   ├── coding-standards.md           │ [STATUS] │         │
+│   ├── api-standards.md              │ [STATUS] │         │
+│   ├── testing-strategy.md           │ [STATUS] │         │
+│   └── performance-slas.md           │ [STATUS] │         │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 01-system-core/03-design/           │ [STATUS] │ [XX]%   │
+│   ├── ui-ux-design-system.md        │ [STATUS] │         │
+│   └── component-library.md          │ [STATUS] │         │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 01-system-core/04-governance/       │ [STATUS] │ [XX]%   │
+│   ├── security-policy.md            │ [STATUS] │         │
+│   ├── decision-log.md               │ [STATUS] │         │
+│   └── glossary.md                   │ [STATUS] │         │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 01-system-core/project-status.md    │ [STATUS] │         │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 02-domains/                         │ [STATUS] │ [N] domains │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 03-features/                        │ [STATUS] │ [M] specs   │
+├─────────────────────────────────────┼──────────┼─────────┤
+│ 04-operations/                      │ [STATUS] │ [XX]%   │
+│   ├── implementation-active.md      │ [STATUS] │         │
+│   ├── session-handoff.md            │ [STATUS] │         │
+│   └── roadmap.md                    │ [STATUS] │         │
+└─────────────────────────────────────┴──────────┴─────────┘
+
+**Overall Completion:** [XX]%
+```
+
+### Status Definitions
+
+| Status | Meaning |
+|--------|---------|
+| Done | File exists with substantive content (>100 chars, has sections) |
+| Partial | File exists but only template/placeholder content |
+| Empty | File exists but <50 chars or blank |
+| Missing | File does not exist |
+
+### Calculate Completion
+
+```python
+# Completion scoring
+REQUIRED_FILES = 14  # 13 system-core + project-status.md
+populated = count(files with status == Done)
+partial = count(files with status == Partial)
+completion = (populated + partial * 0.5) / REQUIRED_FILES * 100
+```
+
+### Present Scan Results
+
+**If 100% complete:**
+```markdown
+**ASDF structure is COMPLETE.**
+
 - Created: [date from earliest file]
 - Last updated: [date from most recent file]
-- System-core: [X]/13 files populated
 - Domains: [N] defined
 - Features: [M] specs
 
 Please choose:
-- **[continue]** Resume setup, fill gaps in existing docs
-- **[override]** Start fresh, replace existing structure (WARNING: destructive)
+- **[update]** Update existing docs → Run `/asdf:update`
+- **[spec]** Add new feature → Run `/asdf:spec`
 - **[cancel]** Abort
-
-Type your choice:
 ```
 
-**On user choice:**
-- `continue` → Skip to Step 2, analyze gaps, fill missing files only
-- `override` → Warn again, then proceed from Step 1 (clears existing)
-- `cancel` → Abort command
+**If incomplete (<100%):**
+```markdown
+**ASDF structure exists but INCOMPLETE.**
 
-**If not exists:** Proceed to Step 1.
+[Show scan table above]
+
+**Missing/Incomplete:**
+- [List specific files with Missing/Empty/Partial status]
+
+Please choose:
+- **[continue]** Resume setup, fill gaps only (recommended)
+- **[override]** Start fresh, replace existing (WARNING: destructive)
+- **[cancel]** Abort
+```
+
+### On User Choice
+
+**On continue:**
+1. Track which files need work (Missing, Empty, Partial)
+2. Skip to Step 2 (Reference Collection)
+3. In Step 3, ONLY generate content for incomplete files
+4. Preserve existing content in Done files
+
+**On override:**
+1. Show second warning:
+   ```markdown
+   **WARNING: This will DELETE all existing ASDF content.**
+
+   - [N] system-core files will be replaced
+   - [M] domain specs will be deleted
+   - [P] feature specs will be deleted
+
+   Type "CONFIRM" to proceed, or any other key to cancel.
+   ```
+2. If confirmed → Delete astraler-docs/, proceed to Step 1
+3. If not → Return to choice prompt
+
+**On cancel:** Abort command
 
 ---
 
@@ -320,3 +416,29 @@ After user confirms:
 - **Include diagrams** — Mermaid diagrams are mandatory in system-core
 - **Ask, don't assume** — Let user choose their path
 - **Show, then adjust** — Draft first, iterate on feedback
+
+---
+
+## Help
+
+**Usage:** `/asdf:init`
+
+**Arguments:** None (interactive)
+
+**Behavior:**
+1. Scan for existing ASDF structure
+2. If exists: Show completeness scan, offer continue/override/cancel
+3. If new: Ask starting point (A/B/C/D)
+4. Collect reference documents
+5. Generate structure based on path chosen
+6. Present for refinement loop
+7. Finalize on confirm
+
+**Examples:**
+- `/asdf:init` — Start interactive init
+- Choose A for new project, B for existing code, C for requirements, D for mixed
+
+**Related:**
+- `/asdf:spec` — Create individual feature spec
+- `/asdf:update` — Update existing component
+- `/asdf` — All commands

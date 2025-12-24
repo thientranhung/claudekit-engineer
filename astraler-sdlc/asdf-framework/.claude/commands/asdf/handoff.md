@@ -65,35 +65,104 @@ Next session can continue with: `/asdf:code [feature]`
    - [List any uncommitted changes]
    ```
 
-3. **Update session-handoff.md:**
+3. **Update session-handoff.md with enhanced template:**
    ```markdown
    # Session Handoff
 
    > **Date:** YYMMDD
    > **Duration:** ~[X] hours
+   > **Session ID:** [instance-id or "solo"]
 
-   ## Completed This Session
-   - [List of completed items]
+   ---
 
-   ## In Progress
-   - [Item] — [X]% complete, next step: [action]
+   ## Mental Context (Critical for Reload)
 
-   ## Blockers
-   - [Blocker] — [Status: Waiting/Investigating/Resolved]
+   **What I was trying to do:**
+   [1-2 sentences describing high-level goal]
+
+   **Why this approach:**
+   [Key architectural/design decisions and rationale]
+
+   **What I learned:**
+   - [Insight 1 about the codebase]
+   - [Insight 2 about dependencies]
+   - [Gotcha or unexpected behavior discovered]
+
+   ---
+
+   ## Technical Context
+
+   **Completed This Session:**
+   - [Task 1] — Done
+   - [Task 2] — Done
+
+   **In Progress:**
+   - [Task] — [X]% complete
+     - **Next step:** [specific action]
+     - **Blocker:** [if any]
+
+   **File Changes Summary:**
+   | File | Change Type | Description |
+   |------|-------------|-------------|
+   | [file1.ts] | Modified | [what changed] |
+   | [file2.ts] | Added | [purpose] |
+   | [file3.ts] | Deleted | [why removed] |
+
+   ---
 
    ## Decisions Made
-   - [Decision] — Rationale: [why]
+
+   | Decision | Options Considered | Chosen | Rationale |
+   |----------|-------------------|--------|-----------|
+   | [decision1] | A, B | A | [why] |
+   | [decision2] | X, Y, Z | Y | [why] |
+
+   ---
+
+   ## Blockers & Questions
+
+   | Blocker/Question | Status | Action Needed |
+   |------------------|--------|---------------|
+   | [blocker1] | Waiting | [what's needed] |
+   | [question1] | Open | [who to ask] |
+
+   ---
+
+   ## Environment Context
+
+   **Branch:** [current branch name]
+   **Uncommitted Changes:** [Yes/No — list if yes]
+   **Tests Status:** [Passing/Failing — count if failing]
+   **Build Status:** [OK/Broken]
+
+   ---
 
    ## Next Session Should
-   1. [First priority action]
+
+   1. **[FIRST]** [Most important action with specific command]
    2. [Second priority]
    3. [Third priority]
 
+   ---
+
    ## Quick Start
    ```bash
+   # Branch and status
+   git checkout [branch]
+   git status
+
    # Resume from here:
-   [command to continue work]
+   /asdf:code [feature-path]
+   # OR
+   [specific command to continue]
    ```
+
+   ---
+
+   ## Context Files to Load
+   - `astraler-docs/03-features/[feature]/spec.md`
+   - `astraler-docs/04-operations/active/[feature].md`
+   - [Any other relevant files]
    ```
 
 4. **Trigger related updates:**
@@ -126,3 +195,36 @@ Next session can continue with: `/asdf:code [feature]`
 - **Be specific** — "Fix auth bug" is useless; "Fix JWT expiry check in auth/middleware.ts:47" is useful
 - **Include quick start** — Reduce context-loading time for next session
 - **Honest about blockers** — Don't hide problems, document them
+- **Mental context matters** — Decisions and rationale are hardest to reload
+
+---
+
+## Help
+
+**Usage:** `/asdf:handoff`
+
+**Arguments:** None
+
+**Behavior:**
+1. Release any feature locks held by this session
+2. Gather session context (completed, in-progress, blockers)
+3. Update implementation-active.md
+4. Create enhanced session-handoff.md
+5. Trigger sync if specs outdated
+6. Verify all changes committed
+
+**Output Sections:**
+- Mental Context (critical for reload)
+- Technical Context (tasks, files)
+- Decisions Made (with rationale)
+- Blockers & Questions
+- Environment Context (branch, tests)
+- Quick Start commands
+
+**Examples:**
+- `/asdf:handoff` — Create handoff before ending session
+
+**Related:**
+- `/asdf:status` — Quick status update
+- `/asdf:onboard` — For next session orientation
+- `/asdf` — All commands

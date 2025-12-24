@@ -27,39 +27,61 @@ argument-hint: [spec-path]
 
 ---
 
-### Step 2: Analyze Test Requirements
+### Step 2: Analyze and Present Test Matrix
 
-Present test plan:
+Present test matrix with classification:
 
 ```markdown
-**Test Generation Plan**
+**Test Matrix: [feature-name]**
 
-Feature: [feature-name]
 Spec Version: [X.Y.Z]
 
-**Test Types Required:**
+---
 
-| Type | Count | Coverage |
-|------|-------|----------|
-| Unit | [N] | Core logic |
-| Integration | [N] | API endpoints |
-| E2E | [N] | User flows |
+## Test Coverage Matrix
 
-**From Acceptance Criteria:**
+┌────────┬───────────────────────────────────────────────────────────────┐
+│ AC     │ Test Types                                                    │
+│        ├────────────┬─────────────┬────────────┬───────────────────────┤
+│        │ Unit       │ Integration │ API        │ E2E (Playwright)      │
+├────────┼────────────┼─────────────┼────────────┼───────────────────────┤
+│ AC-001 │ [x] P1     │ [ ]         │ [ ]        │ [ ]                   │
+│ AC-002 │ [ ]        │ [x] P1      │ [x] P1     │ [ ]                   │
+│ AC-003 │ [ ]        │ [ ]         │ [ ]        │ [x] P2                │
+│ AC-004 │ [x] P1     │ [x] P2      │ [ ]        │ [ ]                   │
+└────────┴────────────┴─────────────┴────────────┴───────────────────────┘
 
-| AC | Description | Test Type | Priority |
-|----|-------------|-----------|----------|
-| AC-001 | [criteria] | Unit | P1 |
-| AC-002 | [criteria] | Integration | P1 |
-| AC-003 | [criteria] | E2E | P2 |
+---
+
+## Test Classification
+
+| Type | Framework | Location | Count |
+|------|-----------|----------|-------|
+| Unit | Jest/Vitest | `__tests__/[feature]/` | [N] |
+| Integration | Jest + Supertest | `__tests__/[feature]/*.integration.test.ts` | [N] |
+| API | Jest + HTTP client | `__tests__/[feature]/*.api.test.ts` | [N] |
+| E2E | Playwright | `e2e/[feature].spec.ts` | [N] |
+
+---
+
+## Priority Legend
+
+- **P0**: Critical path, must pass for release
+- **P1**: High priority, core functionality
+- **P2**: Medium priority, important but not blocking
+- **P3**: Low priority, edge cases
+
+---
 
 **Additional Tests (from spec analysis):**
-
 - Edge case: [description]
 - Error handling: [description]
 - Performance: [if NFR defined]
 
-**Proceed with test generation? (yes/feedback)**
+**Options:**
+- **[yes]** Generate all tests (Unit + Integration + API + E2E)
+- **[skip-e2e]** Generate Unit + Integration + API only (recommended for most features)
+- **[feedback]** Adjust test plan
 ```
 
 ---
@@ -106,15 +128,30 @@ describe('[Feature] API', () => {
 });
 ```
 
-**E2E Tests:**
+**E2E Tests (Playwright) — Optional:**
+
+> E2E tests add complexity. Only use for critical user journeys.
+> Use `skip-e2e` option if not needed.
+
 ```typescript
 // e2e/[feature].spec.ts
-describe('[Feature] User Flow', () => {
-  it('should complete [flow name] (AC-003)', () => {
-    // User journey steps
+import { test, expect } from '@playwright/test';
+
+test.describe('[Feature] - [User Journey]', () => {
+  test('AC-XXX: [description]', async ({ page }) => {
+    // Navigate
+    await page.goto('/[url]');
+
+    // Interact (from spec user flow)
+    // ...
+
+    // Assert
+    await expect(page.getByText('[expected]')).toBeVisible();
   });
 });
 ```
+
+**Setup:** Run `npm init playwright@latest` — see https://playwright.dev/docs/intro
 
 ---
 
@@ -221,3 +258,43 @@ Tests Generated: [N] total
 - **Maintainable** — Use fixtures, avoid magic values
 - **Fast Feedback** — Prioritize unit over E2E where possible
 - **Living Docs** — Tests document expected behavior
+- **Matrix First** — Present test matrix before generating
+- **Playwright for E2E** — Use Playwright for browser tests
+
+---
+
+## Help
+
+**Usage:** `/asdf:test [spec-path|feature-name]`
+
+**Arguments:**
+- spec-path: Full path to spec.md (e.g., `astraler-docs/03-features/241220-checkout/`)
+- feature-name: Feature name to find in `03-features/` (e.g., `checkout`)
+
+**Behavior:**
+1. Load spec and testing standards
+2. Analyze acceptance criteria
+3. Present test matrix with classification
+4. Generate test files (Unit, Integration, API, E2E)
+5. Generate fixtures from spec examples
+6. Update spec with test mapping
+
+**Test Frameworks:**
+- Unit: Jest or Vitest
+- Integration: Jest + Supertest
+- API: Jest + HTTP client
+- E2E: Playwright
+
+**Examples:**
+- `/asdf:test checkout` — Generate tests for checkout feature
+- `/asdf:test astraler-docs/03-features/241220-user-auth/` — Full path
+
+**Options during generation:**
+- `skip-e2e` — Generate Unit + Integration + API only (recommended)
+- `yes` — Generate all tests including E2E
+- `feedback` — Adjust test plan
+
+**Related:**
+- `/asdf:code` — Implement feature (run tests after)
+- `/asdf:report` — Check test coverage
+- `/asdf` — All commands

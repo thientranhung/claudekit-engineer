@@ -54,7 +54,54 @@ Type your choice:
 - `view` → Display current spec, no changes
 - `cancel` → Abort command
 
-**If not exists:** Proceed to Step 1.
+**If not exists:** Proceed to Step 0.5.
+
+---
+
+### Step 0.5: Acquire Spec Lock (Multi-Instance)
+
+Before editing (new or existing spec), acquire lock:
+
+1. **Generate instance ID** (if not set):
+   ```bash
+   # Format: YYMMDD-HHMM-random
+   echo "$(date +%y%m%d-%H%M)-$(openssl rand -hex 2)"
+   ```
+
+2. **Check for existing lock:**
+   ```bash
+   cat astraler-docs/04-operations/spec-locks/[feature-name].lock 2>/dev/null
+   ```
+
+3. **If locked by another instance:**
+   ```markdown
+   **SPEC LOCKED**
+
+   Feature: [feature-name]
+   Locked by: [other-instance-id]
+   Since: [timestamp]
+   Last activity: [N minutes ago]
+
+   [STOPPED] Cannot edit while locked.
+
+   Options:
+   - Wait for lock release
+   - Contact editor to coordinate
+   - Type `force` to override (DANGER: may cause conflicts)
+   ```
+
+4. **If not locked or owned by this instance:**
+   Create/update lock file:
+   ```markdown
+   # Spec Lock: [feature-name]
+
+   Instance: [instance-id]
+   Acquired: [YYMMDD HH:MM]
+   Last Activity: [YYMMDD HH:MM]
+   Operation: DESIGN
+   ```
+
+5. **Proceed to Step 1**
 
 ---
 
@@ -180,6 +227,10 @@ On **Confirm**:
 3. Create folder: `astraler-docs/03-features/YYMMDD-[feature-name]/`
 4. Save `spec.md` with final version
 5. Create `changelog.md` with creation entry
+6. **Release spec lock:**
+   ```bash
+   rm astraler-docs/04-operations/spec-locks/[feature-name].lock
+   ```
 
 ```markdown
 **Spec Finalized**
@@ -188,6 +239,7 @@ On **Confirm**:
 - **Version:** [X.Y.Z]
 - **Status:** Approved
 - **Location:** astraler-docs/03-features/YYMMDD-[feature-name]/spec.md
+- **Lock:** Released
 
 **Next steps:**
 - Review spec one more time
@@ -232,3 +284,33 @@ astraler-docs/03-features/YYMMDD-[feature-name]/
 - **Link domains** — Reference relevant domain specs
 - **List open questions** — Unresolved items at end of spec
 - **No implementation** — Design only, code comes via `/asdf:code`
+- **Lock before edit** — Acquire spec lock in multi-instance scenarios
+
+---
+
+## Help
+
+**Usage:** `/asdf:spec [feature-name]`
+
+**Arguments:**
+- feature-name: Name of the feature to spec (e.g., "checkout", "user-auth")
+
+**Behavior:**
+1. Check for duplicate spec
+2. Acquire spec lock (multi-instance)
+3. Collect reference documents
+4. Load context from system-core/domains
+5. Draft spec with all required sections
+6. Refinement loop until confirmed
+7. Save to `03-features/YYMMDD-[name]/`
+8. Release spec lock
+
+**Examples:**
+- `/asdf:spec checkout` — Create checkout feature spec
+- `/asdf:spec user-authentication` — Create auth feature spec
+
+**Related:**
+- `/asdf:code` — Implement from spec
+- `/asdf:update` — Update existing spec
+- `/asdf:sync` — Sync spec after code changes
+- `/asdf` — All commands
