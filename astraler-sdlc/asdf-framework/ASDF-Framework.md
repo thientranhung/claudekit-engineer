@@ -1,10 +1,18 @@
 # ASDF (Astraler Spec-Driven Framework)
 
-> **Version**: 2.1.0
-> **Last Updated**: 251224
+> **Version**: 3.0.0
+> **Last Updated**: 241224
 > **Status**: Production Ready
 
-### v2.1 Features
+### v3.0 Features
+- **Testing Strategy** — AI generates test cases from spec ACs (`/asdf:test`)
+- **PR Protocol** — Structured code review with `/asdf:pr` and `/asdf:review`
+- **Dependency Check** — Block implementation if prerequisites not met
+- **Impact Analysis** — Detect breaking changes before implementation
+- **Roadmap Management** — Phase-based feature planning (`/asdf:roadmap`)
+- **Multi-Instance Support** — Lock mechanism for parallel Claude instances
+
+### v2.1 Features (Inherited)
 - **Iterative Refinement Loop** — Feedback → Reference → Confirm cycle
 - **Duplicate Detection** — Checks existing specs before creation
 - **Reference Collection** — Progressive document gathering
@@ -93,6 +101,10 @@ astraler-docs/
 └── 04-operations/           # Tier 4: Execution state
     ├── implementation-active.md
     ├── session-handoff.md
+    ├── roadmap.md           # v3: Phase-based planning
+    ├── active/              # v3: Per-feature execution files
+    ├── completed/           # v3: Archived completed features
+    ├── locks/               # v3: Multi-instance lock files
     └── changelog/
 ```
 
@@ -118,57 +130,63 @@ When starting any task, AI loads context in this sequence:
 │   ├── init.md              # Initialize ASDF structure
 │   ├── spec.md              # Create feature specifications
 │   ├── code.md              # Execute implementation from spec
+│   ├── test.md              # v3: Generate tests from spec
 │   ├── sync.md              # Trigger Reverse Sync
+│   ├── pr.md                # v3: Create PR package
+│   ├── review.md            # v3: AI code review
+│   ├── roadmap.md           # v3: Manage project phases
 │   ├── status.md            # Update project status
 │   └── handoff.md           # Create session handoff notes
 ├── skills/
-│   ├── spec-governance/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── validation-rules.md
-│   │       ├── feature-template.md
-│   │       ├── domain-template.md
-│   │       └── system-core-templates/
-│   ├── reverse-sync/
-│   │   ├── SKILL.md
-│   │   └── references/sync-protocol.md
-│   ├── context-loading/
-│   │   ├── SKILL.md
-│   │   └── references/loading-order.md
-│   └── refinement-loop/
-│       ├── SKILL.md
-│       └── references/reference-collection.md
+│   ├── spec-governance/     # Validate specs, templates
+│   ├── reverse-sync/        # Code-spec reconciliation
+│   ├── context-loading/     # Hierarchical context loading
+│   ├── refinement-loop/     # Feedback/reference/confirm cycle
+│   ├── impact-analysis/     # v3: Dependency & breaking changes
+│   ├── testing/             # v3: Test generation patterns
+│   └── pr-review/           # v3: PR & review protocols
 └── agents/
-    └── asdf-coder.md        # Single agent with 3 modes
+    └── asdf-coder.md        # Single agent with multiple modes
 ```
 
 ### 4.2 Slash Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/asdf:init` | Initialize ASDF structure for new project |
-| `/asdf:spec [feature]` | Brainstorm and create feature specification |
-| `/asdf:code [path]` | Execute implementation from specification |
-| `/asdf:sync` | Trigger Reverse Sync (Code → Docs) |
-| `/asdf:status` | Update project-level status heartbeat |
-| `/asdf:handoff` | Create session handoff notes |
+| Command | Purpose | Mode |
+|---------|---------|------|
+| `/asdf:init` | Initialize ASDF structure for new project | DESIGN |
+| `/asdf:spec [feature]` | Brainstorm and create feature specification | DESIGN |
+| `/asdf:code [path]` | Execute implementation from specification | EXECUTE |
+| `/asdf:test [feature]` | Generate test cases from spec ACs | TEST |
+| `/asdf:sync` | Trigger Reverse Sync (Code → Docs) | SYNC |
+| `/asdf:pr [feature]` | Create PR package for code review | PR |
+| `/asdf:review [path]` | AI code review from fresh context | REVIEW |
+| `/asdf:roadmap` | Manage project phases and priorities | OPS |
+| `/asdf:status` | Update project-level status heartbeat | OPS |
+| `/asdf:handoff` | Create session handoff notes | OPS |
 
 ### 4.3 Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `spec-governance` | Validate specs, enforce standards, templates |
-| `reverse-sync` | Detect deviations, update specs |
-| `context-loading` | Load hierarchical context properly |
-| `refinement-loop` | Collect references, iterate feedback/refine/confirm |
+| Skill | Purpose | Version |
+|-------|---------|---------|
+| `spec-governance` | Validate specs, enforce standards, templates | v2.0 |
+| `reverse-sync` | Detect deviations, update specs | v2.0 |
+| `context-loading` | Load hierarchical context properly | v2.0 |
+| `refinement-loop` | Collect references, iterate feedback/refine/confirm | v2.1 |
+| `impact-analysis` | Dependency check + breaking change detection | v3.0 |
+| `testing` | Generate test cases from spec ACs | v3.0 |
+| `pr-review` | PR package creation + AI code review | v3.0 |
 
 ### 4.4 Agent
 
 | Agent | Mode | Purpose |
 |-------|------|---------|
 | `asdf-coder` | DESIGN | Create/refine specs (brainstorm, structure) |
-| `asdf-coder` | EXECUTE | Implement code from specs |
+| `asdf-coder` | EXECUTE | Implement code from specs (with lock, dependency, impact checks) |
 | `asdf-coder` | SYNC | Validate code-spec alignment, reverse sync |
+| `asdf-coder` | TEST | Generate test suites from spec ACs |
+| `asdf-coder` | PR | Create PR packages for review |
+| `asdf-coder` | REVIEW | AI code review from fresh context |
+| `asdf-coder` | OPS | Roadmap, status, handoff management |
 
 ---
 
@@ -513,6 +531,286 @@ AI: [Reads session-handoff.md]
 Architect: Yes, here they are...
 
 AI: [Continues implementation seamlessly]
+```
+
+---
+
+### Case Study 5: Test Generation (v3)
+
+**Scenario:** Generating comprehensive tests from spec acceptance criteria
+
+```
+Architect: /asdf:test guest-checkout
+
+AI: [Loads spec: 03-features/251224-guest-checkout/spec.md]
+    [Analyzes acceptance criteria]
+
+    **Test Plan for guest-checkout**
+
+    Spec Version: v1.2.0
+
+    ### Unit Tests
+
+    | Test ID | AC | Description | Priority |
+    |---------|-----|-------------|----------|
+    | UT-001 | AC-001 | Guest can checkout without account | P0 |
+    | UT-002 | AC-001 | Validates email format | P0 |
+    | UT-003 | AC-002 | Order confirmation email sent | P0 |
+
+    ### Integration Tests
+
+    | Test ID | AC | Description | Priority |
+    |---------|-----|-------------|----------|
+    | IT-001 | AC-001 | POST /checkout/guest returns 201 | P0 |
+    | IT-002 | AC-003 | Account creation prompt shown | P1 |
+
+    ### Edge Cases
+
+    | Case | Description | How to Handle |
+    |------|-------------|---------------|
+    | EC-001 | Cart empty | Return 400 with message |
+    | EC-002 | Payment timeout | Retry 3x, then fail gracefully |
+
+    Proceed with test generation? (yes/feedback)
+
+Architect: yes
+
+AI: [Creates test files]
+
+    **Tests Generated:**
+    - __tests__/guest-checkout/checkout.test.ts (6 tests)
+    - __tests__/guest-checkout/checkout.integration.test.ts (4 tests)
+    - __tests__/guest-checkout/fixtures.ts
+
+    **Spec Updated:**
+    - Testing section populated with test mapping
+
+    Run: npm test -- --grep "guest-checkout"
+```
+
+---
+
+### Case Study 6: Dependency Check & Impact Analysis (v3)
+
+**Scenario:** Starting implementation with unmet dependencies
+
+```
+Architect: /asdf:code 03-features/251225-order-history
+
+AI: [Acquires lock for order-history]
+    [Reads spec, checks dependencies]
+
+    **BLOCKED: Dependencies not satisfied**
+
+    Feature: order-history
+
+    | Dependency | Type | Status | Blocker? |
+    |------------|------|--------|----------|
+    | orders domain | Domain | Implemented | No |
+    | 251224-guest-checkout | Feature | 60% | YES |
+
+    This feature requires guest-checkout to be complete.
+
+    Options:
+    - [wait] Abort until dependencies ready
+    - [stub] Create interface stubs
+    - [override] Proceed anyway (RISK)
+
+    What would you like to do?
+
+Architect: wait
+
+AI: [Releases lock]
+
+    Lock released. Feature available for later.
+
+    Recommendation:
+    1. Complete guest-checkout first: /asdf:code 03-features/251224-guest-checkout
+    2. Then return: /asdf:code 03-features/251225-order-history
+```
+
+**Later, with breaking changes detected:**
+
+```
+Architect: /asdf:code 03-features/251226-oauth-login
+
+AI: [Acquires lock, passes dependency check]
+    [Running impact analysis...]
+
+    **Impact Analysis**
+
+    Feature: oauth-login
+
+    **Breaking Changes Detected:**
+
+    | Affected | Type | Change | Severity |
+    |----------|------|--------|----------|
+    | 251224-guest-checkout | API | /auth/login signature | HIGH |
+    | user-profile | Schema | User.authProvider field | MEDIUM |
+
+    Total: 1 HIGH, 1 MEDIUM
+
+    Options:
+    - [review] Show detailed impact
+    - [proceed] Continue (update specs later)
+    - [abort] Cancel
+
+Architect: review
+
+AI: ### HIGH: guest-checkout
+
+    Current: POST /auth/login accepts {email, password}
+    After: POST /auth/login accepts {email, password, provider?}
+
+    Impact: Existing login calls will still work (provider optional)
+    Mitigation: None needed, backwards compatible
+
+    Proceed? (yes/abort)
+
+Architect: yes
+
+AI: [Continues implementation with impact logged]
+    Reminder: Run /asdf:sync for affected features after.
+```
+
+---
+
+### Case Study 7: PR Protocol & AI Review (v3)
+
+**Scenario:** Creating PR package and getting AI review
+
+```
+Architect: /asdf:pr guest-checkout
+
+AI: [Gathering changes for guest-checkout...]
+
+    **PR Package Created**
+
+    Location: .pr-review/241224-guest-checkout/
+
+    | File | Purpose |
+    |------|---------|
+    | summary.md | PR description |
+    | changes.md | 12 files changed |
+    | spec-diff.md | 1 deviation |
+    | checklist.md | Review checklist |
+
+    AC Coverage: 5/5 implemented
+
+    Next: /asdf:review .pr-review/241224-guest-checkout/
+```
+
+**Getting AI review (ideally in fresh instance):**
+
+```
+Architect: /asdf:review .pr-review/241224-guest-checkout/
+
+AI: [Loading PR package with FRESH context...]
+    [Reading spec from scratch...]
+    [Applying review checklist...]
+
+    # AI Review: Guest Checkout
+
+    **Verdict: REQUEST_CHANGES**
+
+    ## Spec Compliance: 4/5 ACs Passing
+
+    | AC | Status | Notes |
+    |----|--------|-------|
+    | AC-001 | PASS | |
+    | AC-002 | PASS | |
+    | AC-003 | FAIL | Missing GDPR consent checkbox |
+    | AC-004 | PASS | |
+    | AC-005 | PASS | |
+
+    ## Issues Found
+
+    ### Critical (1)
+    | File | Line | Issue |
+    |------|------|-------|
+    | GuestCheckoutForm.tsx | 45 | Missing GDPR consent before address save |
+
+    ### Major (1)
+    | File | Line | Issue |
+    |------|------|-------|
+    | checkout.service.ts | 78 | No retry for payment API timeout |
+
+    ## Required Actions
+    1. Add GDPR consent checkbox (AC-003)
+    2. Add payment retry logic
+
+    After fixes: /asdf:review .pr-review/241224-guest-checkout/
+```
+
+---
+
+### Case Study 8: Multi-Instance & Roadmap (v3)
+
+**Scenario:** Two Claude instances working in parallel
+
+**Instance 1:**
+```
+Architect: /asdf:code guest-checkout
+
+AI: [Checking locks...]
+    [No lock exists, acquiring...]
+
+    Lock acquired for guest-checkout.
+    Created: 04-operations/active/guest-checkout.md
+
+    Proceeding with implementation...
+```
+
+**Instance 2 (simultaneous):**
+```
+Architect: /asdf:code guest-checkout
+
+AI: **FEATURE LOCKED**
+
+    Feature: guest-checkout
+    Locked by: Instance-1
+    Since: 5 minutes ago
+    Task: "Implementing FR-001 to FR-003"
+
+    Options:
+    - [wait] Check again later
+    - [force] Override (DANGER)
+    - [other] Work on different feature
+
+Architect: other
+
+AI: Available features without locks:
+    - order-management
+    - push-notifications
+
+    Which would you like to work on?
+```
+
+**Managing project roadmap:**
+```
+Architect: /asdf:roadmap
+
+AI: **Project Roadmap v1.0**
+
+    Current Phase: Phase 1 - MVP Auth (60%)
+
+    | Phase | Status | Progress |
+    |-------|--------|----------|
+    | Phase 1: MVP Auth | Active | 60% |
+    | Phase 2: Payments | Planned | 0% |
+    | Phase 3: Scale | Planned | 0% |
+
+    Phase 1 Features:
+    | Priority | Feature | Status |
+    |----------|---------|--------|
+    | P0 | user-auth | Done |
+    | P0 | guest-checkout | 60% |
+    | P0 | push-notifications | Blocked |
+
+    Commands:
+    - /asdf:roadmap add [feature] [phase] [priority]
+    - /asdf:roadmap reorder [feature] [target]
+    - /asdf:roadmap phase close
 ```
 
 ---

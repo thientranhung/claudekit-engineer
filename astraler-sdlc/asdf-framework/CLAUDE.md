@@ -27,27 +27,37 @@ You are a **Coder AI** operating under the direction of a **Product Architect**.
 
 | Command | Purpose |
 |---------|---------|
-| `/asdf` | Smart dispatcher - routes to appropriate subcommand |
 | `/asdf:init` | Initialize ASDF folder structure for new project |
 | `/asdf:spec [feature]` | Brainstorm and create feature specification |
-| `/asdf:implement [spec-path]` | Execute implementation from specification |
+| `/asdf:code [spec-path]` | Execute implementation from specification |
+| `/asdf:test [feature]` | Generate test cases from spec acceptance criteria |
 | `/asdf:sync` | Trigger Reverse Sync (Code → Docs) |
+| `/asdf:pr [feature]` | Create PR package for code review |
+| `/asdf:review [path]` | AI code review from fresh context |
+| `/asdf:roadmap` | Manage project phases and priorities |
 | `/asdf:status` | Update project-level status heartbeat |
 | `/asdf:handoff` | Create session handoff notes |
 
 ## Documentation Structure
 
 ```
-asdf-docs/
+astraler-docs/
 ├── 01-system-core/          # Tier 1: Global rules, project DNA
-│   ├── master-map.md
-│   ├── ui-ux-design-system.md
+│   ├── 01-architecture/
+│   ├── 02-standards/
+│   ├── 03-design/
+│   ├── 04-governance/
 │   └── project-status.md
 ├── 02-domains/              # Tier 2: Module-level business logic
 ├── 03-features/             # Tier 3: Actionable feature specs
+│   └── YYMMDD-feature-name/
 └── 04-operations/           # Tier 4: Execution state, session memory
     ├── implementation-active.md
     ├── session-handoff.md
+    ├── roadmap.md           # Phase-based feature management
+    ├── active/              # Per-feature execution files
+    ├── completed/           # Archived completed features
+    ├── locks/               # Multi-instance lock files
     └── changelog/
 ```
 
@@ -62,6 +72,9 @@ asdf-docs/
 **IMPORTANT:** Activate `spec-governance` skill for all spec-related operations.
 **IMPORTANT:** Activate `reverse-sync` skill after any implementation that deviates from specs.
 **IMPORTANT:** Activate `context-loading` skill when starting new tasks to load proper context hierarchy.
+**IMPORTANT:** Activate `impact-analysis` skill before `/asdf:code` for dependency and breaking change checks.
+**IMPORTANT:** Activate `testing` skill for test generation from specs.
+**IMPORTANT:** Activate `pr-review` skill for PR packages and AI code review.
 
 ## Context Loading Order
 
@@ -85,7 +98,11 @@ When starting any task:
 ## Quality Gates
 
 Before marking any task complete:
+- [ ] Lock acquired (if multi-instance)
+- [ ] Dependency check passed
+- [ ] Impact analysis completed (breaking changes acknowledged)
 - [ ] Code matches spec intent (or spec has been updated)
 - [ ] Reverse sync completed if any deviations
 - [ ] `implementation-active.md` updated with current state
+- [ ] Lock released on completion
 - [ ] No orphaned changes (all changes documented)
